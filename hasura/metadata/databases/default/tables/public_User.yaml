@@ -1,0 +1,11 @@
+table:
+  name: User
+  schema: public
+array_relationships:
+  - name: Posts
+    using:
+      foreign_key_constraint_on:
+        column: authorId
+        table:
+          name: Post
+          schema: public
