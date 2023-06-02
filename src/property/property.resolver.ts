@@ -1,5 +1,4 @@
 import { Query, Resolver } from '@nestjs/graphql';
-import { format } from 'path';
 import { Property } from 'src/contract/models/property.model';
 import {
   FindAllPropertiesByPropertyIdsQueryResponse,
@@ -14,12 +13,13 @@ export class PropertyResolver {
   @Query(() => [Property], { nullable: 'items' })
   async findAllProperties() {
     const { properties } =
-      await this.hasuraClient.queryWithAuth<FindAllPropertiesByPropertyIdsQueryResponse>(
-        findAllProperties(),
+      await this.hasuraClient.execute<FindAllPropertiesByPropertyIdsQueryResponse>(
+        (client) => client.request(findAllProperties()),
       );
     return formatProperties(properties);
   }
 }
+
 function formatProperties(
   properties: import('src/graphql/query.schema').Property[],
 ) {

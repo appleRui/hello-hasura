@@ -8,16 +8,17 @@ export class UserResolver {
 
   @Query(() => [User], { nullable: 'items' })
   async findUser() {
-    const { users } = await this.hasuraClient.queryWithAuth<{
+    const { users } = await this.hasuraClient.execute<{
       users: User[];
-    }>(
-      `query MyQuery {
+    }>((client) =>
+      client.request(`
+      query MyQuery {
         users {
           id
           name
         }
       }
-      `,
+    `),
     );
     return users;
   }

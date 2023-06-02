@@ -12,12 +12,8 @@ export class HasuraClient {
     );
   }
 
-  async query<T>(query, variables = {}) {
-    const data = await this.client.request<T>(query, variables);
-    return data;
-  }
-
-  private async auth() {
+  // https://hasura.io/docs/1.0/graphql/core/auth/authentication/jwt.html#using-jwt-tokens
+  private async generateToken() {
     const claim = {
       iat: Math.floor(Date.now() / 1000) - 30,
       exp: Math.floor(Date.now() / 1000) + 60 * 3,
@@ -28,22 +24,24 @@ export class HasuraClient {
         'x-hasura-allowed-roles': ['developer'],
       },
     };
-    const private_key = process.env.PRIVATE_KEY;
+    const privateKey = process.env.PRIVATE_KEY;
 
-    const token = sign(claim, private_key, {
+    const token = sign(claim, privateKey, {
       algorithm: 'RS256',
     });
     return token;
   }
 
-  async queryWithAuth<T>(query) {
-    const data = await this.client
-      .request<T>(query, undefined, {
-        Authorization: `Bearer ${await this.auth()}`,
-      })
-      .catch((e) => {
-        throw e;
-      });
-    return data;
+  /**
+   * JWT認証付きクエリを実行
+   * @param fn
+   * @returns
+   */
+  async execute<T>(fn: (client: GraphQLClient) => Promise<T>): Promise<T> {
+    const client = this.client.setHeader(
+      'Authorization',
+      `Bearer ${await this.generateToken()}`,
+    );
+    return fn(client);
   }
 }

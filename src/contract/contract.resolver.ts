@@ -40,8 +40,9 @@ export class ContractResolver {
     const contracts = await this.prisma.contracts.findMany();
     const propertyIds = contracts.map((contract) => contract.id);
     const { properties } =
-      await this.hasuraClient.queryWithAuth<FindAllPropertiesByPropertyIdsQueryResponse>(
-        findAllPropertiesByPropertyIdsQuery(propertyIds),
+      await this.hasuraClient.execute<FindAllPropertiesByPropertyIdsQueryResponse>(
+        (client) =>
+          client.request(findAllPropertiesByPropertyIdsQuery(propertyIds)),
       );
     return this.margeContractsAndProperties(contracts, properties);
   }
