@@ -19,6 +19,8 @@ export class HasuraClient {
       exp: Math.floor(Date.now() / 1000) + 60 * 3,
       name: 'developer',
       admin: true,
+      iss: 'developer',
+      aud: 'hasura-server',
       'https://hasura.io/jwt/claims': {
         'x-hasura-default-role': 'developer',
         'x-hasura-allowed-roles': ['developer'],
